@@ -1,0 +1,29 @@
+#simply logit regression analysis on Titanic project https://www.kaggle.com/c/titanic
+
+#read the training and test data into a dataframe 
+train <- read.csv("~/Downloads/train.csv", header = TRUE, na.strings = "")
+test <- read.csv("~/Downloads/test.csv", header = TRUE, na.strings = "")
+
+#set the pclass to be categorical
+train$Pclass <- as.factor(train$Pclass)
+test$Pclass <- as.factor(test$Pclass)
+
+#create a simple logistic regression model with the training data, predicting survival based on passenger class, sex, siblings/spouses and parents/children
+logistic.model <- glm(Survived ~ Pclass + Sex + SibSp + Parch, family = binomial(), data = train)
+
+#generate predictions for training data using logistic model
+training_predictions <- predict(logistic.model)
+
+#compute training error use an outcome cutoff 0.5
+training_error <-sum((training_predictions >= 0.5) != (train$Survived == 1))/nrow(train)
+training_error
+
+#training error for predictions in {0,1}
+test_predictions <- predict(logistic.model, test)
+
+#using a probability cutoff of 0.5 for outcome of survived
+test_predictions[test_predictions >= 0.5] <- 1
+test_predictions[test_predictions != 1] <- 0
+test_predictions[is.na(test_predictions)] <- 0
+
+test_predictions
